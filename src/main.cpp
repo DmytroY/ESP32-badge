@@ -32,15 +32,16 @@ void setup() {
     tft.begin(PIN_SCLK, PIN_MOSI, PIN_CS, PIN_DC, PIN_RST);
 
     tft.fillScreen(BLACK);
-    tft.drawRect(0, 0, TFT_W, TFT_H, WHITE);
+    // tft.drawRect(0, 0, TFT_W, TFT_H, WHITE);
 
     tft.drawQR("https://github.com/DmytroY/ESP32-badge");
 
     // char buff[50];
     // sprintf(buff, "QR version: %d", version_QR);
     // tft.drawText(10,  10, buff, WHITE, BLACK, 2);
-
-    tft.drawText(10,  10, "Dmytro Y", WHITE, BLACK, 4);
+// !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+    tft.drawText(5,   5, "Dmytro", WHITE, BLACK, 4);
+    tft.drawText(5,  42, "Yakovenko", WHITE, BLACK, 2);
 
     Serial.println("Done.");
 }
