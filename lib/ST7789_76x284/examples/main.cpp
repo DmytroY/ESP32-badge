@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "ST7789_76x284.h"
+#include <ST7789_76x284.h>
 
 // ── Pin definitions ─────────────────────────────────────────────────
 #define PIN_SCLK  2

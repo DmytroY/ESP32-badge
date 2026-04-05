@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <qrcode.h>
 
 // ── Colors BRG565 ───
 #define BLACK      0x0000
@@ -27,7 +28,7 @@ class ST7789_76x284 {
         void drawVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
         void drawChar(int16_t x, int16_t y, char c, uint16_t fg, uint16_t bg, uint8_t scale);
         void drawText(int16_t x, int16_t y, const char* str, uint16_t fg, uint16_t bg, uint8_t scale);
-
+        void drawQR(const char* str, int16_t x = -1, int16_t y = -1);
 
     private:
         uint16_t _w, _h, _x_off, _y_off;

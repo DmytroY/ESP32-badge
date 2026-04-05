@@ -234,3 +234,31 @@ void ST7789_76x284::drawText(int16_t x, int16_t y, const char* str, uint16_t fg,
         str++;
     }
 }
+
+void ST7789_76x284::drawQR(const char* str, int16_t x, int16_t y) {
+
+    const uint8_t QR_VERSION  = 3;
+    const uint8_t QUIET       = 2;
+    const uint16_t ZONE       = 76;
+
+    // ── Generate QR ──────────────────────────────────────────────────
+    uint8_t* buf = (uint8_t*)malloc(qrcode_getBufferSize(QR_VERSION));
+    if (!buf) return;
+    QRCode qr;
+    qrcode_initText(&qr, buf, QR_VERSION, ECC_LOW, str);
+
+    // ── Block size and centering ──────────────────────────────────────
+    uint8_t  block    = ZONE / (qr.size + 2 * QUIET);
+    uint16_t total_px = (qr.size + 2 * QUIET) * block;
+    uint16_t offset_x = (x < 0 ? _w - ZONE : x) + (ZONE - total_px) / 2 + QUIET * block;
+    uint16_t offset_y = (y < 0 ? _h - ZONE : y) + (ZONE - total_px) / 2 + QUIET * block;
+
+    // ── Draw ──────────────────────────────────────────────────────────
+    fillRect((x < 0 ? _w - ZONE : x), (y < 0 ? _h - ZONE : y), ZONE, ZONE, WHITE);
+    for (uint8_t row = 0; row < qr.size; row++)
+        for (uint8_t col = 0; col < qr.size; col++)
+            if (qrcode_getModule(&qr, col, row))
+                fillRect(offset_x + col * block, offset_y + row * block, block, block, BLACK);
+
+    free(buf);
+}
