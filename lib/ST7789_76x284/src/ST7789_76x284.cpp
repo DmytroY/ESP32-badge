@@ -216,10 +216,11 @@ static const uint16_t font_10x14[][10] PROGMEM = {
 ST7789_76x284::ST7789_76x284(uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off)
     : _w(w), _h(h), _x_off(x_off), _y_off(y_off) {}
 
-void ST7789_76x284::begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst){
+void ST7789_76x284::begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl){
     _cs = cs;
     _dc = dc;
     _rst = rst;
+    _bl = bl;
     pinMode(_rst, OUTPUT);
     pinMode(_cs,  OUTPUT);
     pinMode(_dc,  OUTPUT);
@@ -252,6 +253,10 @@ void ST7789_76x284::begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t
     send_cmd(0x20); delay(10);   // invertion OFF
     send_cmd(0x13); delay(10);   // Partial mode OFF
     send_cmd(0x29); delay(255);  // Display ON
+    
+    initPWM(_bl); // init PWM for backlight
+    setBrightness(50); //brightness 50%
+
 }
 
 void ST7789_76x284::write_byte(uint8_t b){SPI.transfer(b);}
@@ -407,4 +412,48 @@ void ST7789_76x284::drawQR(const char* str, int16_t x, int16_t y) {
                 fillRect(offset_x + col * block, offset_y + row * block, block, block, BLACK);
 
     free(buf);
+}
+
+void ST7789_76x284::initPWM(int8_t pin) {
+    _bl = pin;
+    if (_bl < 0) return;
+
+    // 1. Setup the Timer
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_LOW_SPEED_MODE, // C3 only supports Low Speed
+        .duty_resolution  = LEDC_TIMER_8_BIT,    // 0-255 range
+        .timer_num        = LEDC_TIMER_0,
+        .freq_hz          = 5000,                // 5kHz frequency
+        // .clk_cfg          = LEDC_AUTO_CLK
+        .clk_cfg = LEDC_USE_RTC8M_CLK
+    };
+    ledc_timer_config(&ledc_timer);
+
+    // 2. Setup the Channel
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num       = (gpio_num_t)_bl,
+        .speed_mode     = LEDC_LOW_SPEED_MODE,
+        .channel        = LEDC_CHANNEL_0,
+        .intr_type      = LEDC_INTR_DISABLE,
+        .timer_sel      = LEDC_TIMER_0,
+        .duty           = 127,                     // Start at 50% brightness
+        .hpoint         = 0
+    };
+    ledc_channel_config(&ledc_channel);
+}
+
+void ST7789_76x284::setBrightness(uint8_t percentage) {
+    if (_bl < 0) return;
+    if (percentage > 100) percentage = 100;
+
+    // Calculate duty (0-255)
+    uint32_t duty = (percentage * 255) / 100;
+
+    // Invert for Active-Low hardware:
+    // 100% -> 0 duty
+    // 0%   -> 255 duty
+    uint32_t inverted_duty = 255 - duty;
+
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, inverted_duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
 }
