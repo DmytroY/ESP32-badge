@@ -227,7 +227,7 @@ void ST7789_76x284::begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t
     digitalWrite(_cs, HIGH);
 
     SPI.begin(sclk, -1, mosi, _cs);
-    SPI.setFrequency(27000000);
+    SPI.setFrequency(8000000);
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
 
@@ -327,20 +327,6 @@ void ST7789_76x284::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_
     drawVLine(x,         y,         h, color);
     drawVLine(x + w - 1, y,         h, color);
 }
-
-// void ST7789_76x284::drawChar(int16_t x, int16_t y, char c, uint16_t fg, uint16_t bg, uint8_t scale){
-//     if (c < ' ' || c > '~') return;
-//     const uint8_t* glyph = font_5x7[c - ' '];
-//     for (uint8_t col = 0; col < 5; col++) {
-//         uint8_t line = glyph[col];
-//         for (uint8_t row = 0; row < 7; row++) {
-//             uint16_t color = (line & (1 << row)) ? fg : bg;
-//             fillRect(x + col * scale, y + row * scale, scale, scale, color);
-//         }
-//     }
-//     // Character gap
-//     fillRect(x + 5 * scale, y, scale, 7 * scale, bg);
-// }
 
 void ST7789_76x284::drawChar(int16_t x, int16_t y, char c, uint16_t fg, uint16_t bg, uint8_t scale) {
     if (c < ' ' || c > '~') return;
