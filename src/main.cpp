@@ -1,15 +1,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include "esp_wifi.h"
 #include <WebServer.h>
 #include <LittleFS.h>
 #include <ST7789_76x284.h>
-#include "esp_pm.h"
-#include "esp_sleep.h"
-#include "soc/rtc_cntl_reg.h"
-#include "driver/gpio.h"
+#include "helper.h"
 
 // --- WiFi settings ------
-#define SSID "DY-BADGE"
+uint8_t mac[6];
+char ssid[20]; // wil be determined based on WiFi MAC to be unique
 #define PASS "12345678"
 
 // ── Pin definitions ─────────────────────────────────────────────────
@@ -19,7 +18,7 @@
 #define PIN_DC    10
 #define PIN_RST   9
 #define PIN_BL    21
-#define BOOT_BUTTON_PIN 9
+#define PIN_BAT   0
 
 // ── Display geometry ────────────────────────────────────────────────
 // landscape
@@ -30,72 +29,25 @@
 
 ST7789_76x284 tft(TFT_W, TFT_H, X_OFFSET, Y_OFFSET);
 WebServer server(80);
-esp_pm_lock_handle_t pwm_lock; // Define the lock handle
 
-unsigned long lastUpdate = 0;
-unsigned brightness = 80;
-String pendingMessage = "";
+float bat_v;
+int bat_percent = 0;
+char bat_perc_buffer[5]; // 3-digit number + % + null terminator
+
+unsigned long lastUpdate = 0; // for brightness blinking
+unsigned brightness = 80;  // initial brightness 80%
+String userMessage = "";
 bool newMessageReady = false;
-
-void goToSleep() {
-
-    server.stop();
-    WiFi.mode(WIFI_OFF);
-
-    // Force the RC_FAST (8MHz) clock to stay on during sleep - required for backlight PWM
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON);
-    // prevent GPIO PIN_BL isolation during sleep - required for backlight PW
-    gpio_sleep_sel_dis((gpio_num_t)PIN_BL);
-    
-    // prevent display reset during sleep
-    pinMode(PIN_RST, OUTPUT);
-    digitalWrite(PIN_RST, HIGH);
-    gpio_hold_en((gpio_num_t)PIN_RST); // Lock the pin state in the RTC pad
-    gpio_sleep_sel_dis((gpio_num_t)PIN_RST); // Disable GPIO isolation
-
-    // Configure wake up on GPIO9 (Boot Button) being LOW
-    gpio_wakeup_enable((gpio_num_t)BOOT_BUTTON_PIN, GPIO_INTR_LOW_LEVEL);
-    esp_sleep_enable_gpio_wakeup();
-
-    // Start sleep
-    tft.setBrightness(50);
-    Serial.println("going to light sleep");
-    sleep(100);
-    esp_light_sleep_start();
-
-    //waking up
-    gpio_hold_dis((gpio_num_t)PIN_RST); // Release display reset the pin hold so the CPU can control it again
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(SSID, PASS); // Restore WiFi AP
-    server.begin();  // Restart the WebServer listener
-    tft.setBrightness(80);
-    Serial.println("waked up");
-}
 
 // ── Setup ───────────────────────────────────────────────────────────
 void setup() {
-    Serial.begin(115200);
-    delay(5000);
-    Serial.println("Serial started");
+    LittleFS.begin();
 
-    if (!LittleFS.begin()) {
-        Serial.println("An Error has occurred while mounting LittleFS");
-        return;
-    }
-
-    WiFi.mode(WIFI_OFF); // Force radio off first
-    delay(100);
+    WiFi.macAddress(mac);
+    snprintf(ssid, sizeof(ssid), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
     WiFi.mode(WIFI_AP);
-    delay(100); 
     WiFi.setTxPower(WIFI_POWER_8_5dBm); // decreased WiFi power
-    if(WiFi.softAP(SSID, PASS, 1)) {
-        Serial.println("SoftAP Started Successfully");
-        Serial.print("IP Address: ");
-        Serial.println(WiFi.softAPIP());
-    } else {
-        Serial.println("SoftAP Failed to Start");
-    }
-
+    WiFi.softAP(ssid, PASS, 1);
 
     server.on("/", []() {
         File file = LittleFS.open("/index.html", "r");
@@ -117,7 +69,7 @@ void setup() {
 
     server.on("/msg", []() {
         if (server.hasArg("text")) {
-            pendingMessage = server.arg("text");
+            userMessage = server.arg("text");
             newMessageReady = true;
             server.send(200, "text/plain", "Queued");
         }
@@ -133,41 +85,62 @@ void setup() {
     tft.drawText(5,   15, "Connect and visit 192.168.4.1", GREEN, BLACK, 1);
 
     static char buf[32];
-    snprintf(buf, sizeof(buf), "SSID: %s", SSID);
+    snprintf(buf, sizeof(buf), "ssid: %s", ssid);
     tft.drawText(5,   35, buf, WHITE, BLACK, 2);
     snprintf(buf, sizeof(buf), "Pass: %s", PASS);
     tft.drawText(5,   57, buf, WHITE, BLACK, 2);
 
     // QR fot WiFi connection
     static char qrBuffer[128];
-    snprintf(qrBuffer, sizeof(qrBuffer), "WIFI:S:%s;T:WPA;P:%s;;", SSID, PASS);
+    snprintf(qrBuffer, sizeof(qrBuffer), "WIFI:S:%s;T:WPA;P:%s;;", ssid, PASS);
     tft.drawQR(qrBuffer);
     tft.setBrightness(brightness);
 
-    Serial.println("Done.");
+    // ------ User data input -----
+    while (userMessage != "done")
+    {
+        server.handleClient();
+        if (newMessageReady && userMessage != "done") {
+            newMessageReady = false;
+            tft.fillScreen(BLACK);
+            tft.drawText(5, 25, userMessage.c_str(), WHITE, BLACK, 2);
+        }
+    }
+    // ---- stop server ----
+    server.stop();
+    WiFi.softAPdisconnect(true);
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    esp_wifi_stop();
+
+    // ADC for battery level measurement
+    analogReadResolution(12);
 }
 
 void loop() {
-    server.handleClient();
+    // indicate battery level
+    // bat_v = 2 * 2.5 * analogRead(PIN_BAT) / 4095;
+    // bat_percent = static_cast<int>(round(100 * (bat_v - 3.2)));
 
-    if(millis() - lastUpdate > 1000){
-        if(brightness < 50){
-            brightness = 80;
-        } else {
-            brightness = 20;
-        }
-        tft.setBrightness(brightness);
-        lastUpdate = millis();
-        Serial.println(brightness);
+    bat_percent-- ;
+    if(bat_percent <= 1) bat_percent = 105;
+
+    snprintf(bat_perc_buffer, sizeof(bat_perc_buffer), "%3d%%", bat_percent);
+    tft.drawText(13, 65, bat_perc_buffer, WHITE, BLACK, 1);
+
+    if(bat_percent <= 20){
+        tft.drawChar(5, 65, (char)0x80, RED, BLACK, 1);
+    } else if(bat_percent <= 40){
+        tft.drawChar(5, 65, (char)0x81, YELLOW, BLACK, 1);
+    } else if(bat_percent <= 60){
+        tft.drawChar(5, 65, (char)0x82, WHITE, BLACK, 1);
+    }else if(bat_percent <= 80){
+        tft.drawChar(5, 65, (char)0x83, GREEN, BLACK, 1);
+    }else {
+        tft.drawChar(5, 65, (char)0x84, GREEN, BLACK, 1);
     }
 
-    if (newMessageReady) {
-        newMessageReady = false;
-        if(pendingMessage == "sleep"){
-            goToSleep();
-        } else {
-             tft.fillScreen(BLACK);
-            tft.drawText(5, 5, pendingMessage.c_str(), WHITE, BLACK, 2);
-        }
-    }
+    tft.drawText(45, 65, "REMAINING BATTERY, 00 min", WHITE, BLACK, 1);
+    
+    goToSleep(1, PIN_BL);
 }

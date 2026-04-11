@@ -57,7 +57,7 @@ void begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl
 
 example of usage:
 
-``` display.drawChar(x, y, (char)0x7F, GREEN, BLACK, 1);```
+``` tft.drawChar(x, y, (char)0x7F, GREEN, BLACK, 1);```
 
 
 ### Display QR code
