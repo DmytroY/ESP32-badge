@@ -94,6 +94,7 @@ void setup() {
     static char qrBuffer[128];
     snprintf(qrBuffer, sizeof(qrBuffer), "WIFI:S:%s;T:WPA;P:%s;;", ssid, PASS);
     tft.drawQR(qrBuffer);
+
     tft.setBrightness(brightness);
 
     // ------ User data input -----

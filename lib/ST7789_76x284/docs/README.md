@@ -45,7 +45,9 @@ void begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl
 
 * Scale 1, 3, 5...: Uses the 5x7 font.
 * Scale 2, 4, 6...: Uses the 10x14 font.
-#### ***str*** can contains printable ASCII simbols or predefined icons:
+* Scale 3,6,9 ....: Uses the 15x21 font.
+
+#### additionaly to printable ASCII simbols predefined iconscan be printed with drawChar():
 1. 0x7F - low consumption mode
 1. 0x80 - Battery 0%
 1. 0x81 - Battety 25%
@@ -54,6 +56,7 @@ void begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl
 1. 0x84 - Battety 100%
 1. 0x85 - WiFi off
 1. 0x86 - WiFi on
+1. 0x87 - 
 
 example of usage:
 
