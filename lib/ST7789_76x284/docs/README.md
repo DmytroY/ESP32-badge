@@ -56,7 +56,7 @@ void begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl
 1. 0x84 - Battety 100%
 1. 0x85 - WiFi off
 1. 0x86 - WiFi on
-1. 0x87 - 
+1. 0x87 - filed gliph
 
 example of usage:
 

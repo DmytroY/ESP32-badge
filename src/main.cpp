@@ -30,14 +30,16 @@ char ssid[20]; // wil be determined based on WiFi MAC to be unique
 ST7789_76x284 tft(TFT_W, TFT_H, X_OFFSET, Y_OFFSET);
 WebServer server(80);
 
-float bat_v;
-int bat_percent = 0;
-char bat_perc_buffer[5]; // 3-digit number + % + null terminator
-
-unsigned long lastUpdate = 0; // for brightness blinking
 unsigned brightness = 80;  // initial brightness 80%
-String userMessage = "";
+
+String userTitle = "";
+String userSubtitle = "";
+String userQR = "";
+String currentAction = "";;
 bool newMessageReady = false;
+
+uint16_t userTextColor = WHITE;
+uint16_t userBgColor = BLACK;
 
 // ── Setup ───────────────────────────────────────────────────────────
 void setup() {
@@ -68,11 +70,22 @@ void setup() {
     });
 
     server.on("/msg", []() {
-        if (server.hasArg("text")) {
-            userMessage = server.arg("text");
-            newMessageReady = true;
-            server.send(200, "text/plain", "Queued");
+        userTitle = server.arg("title");
+        userSubtitle = server.arg("subtitle");
+        userQR = server.arg("qr");
+        currentAction = server.arg("action"); // "test" or "finish"
+
+        userTextColor = (uint16_t)strtol(server.arg("textColor").c_str(), NULL, 0);
+        userBgColor = (uint16_t)strtol(server.arg("bgColor").c_str(), NULL, 0);
+        brightness = server.arg("bright").toInt();
+
+        // Safety Fallback: if colors match, force text to contrast
+        if (userTextColor == userBgColor) {
+            userTextColor = (userBgColor == 0x0000) ? 0xFFFF : 0x0000;
         }
+        
+        newMessageReady = true;
+        server.send(200, "text/plain", "OK");
     });
 
     server.begin();
@@ -81,8 +94,8 @@ void setup() {
     tft.fillScreen(BLACK);
     tft.drawRect(0, 0, TFT_W, TFT_H, WHITE);
     
-    tft.drawText(20,   5, "WELCOME !", GREEN, BLACK, 1);
-    tft.drawText(5,   15, "Connect and visit 192.168.4.1", GREEN, BLACK, 1);
+    tft.drawText(40,  5, "WELCOME !", GREEN, BLACK, 1);
+    tft.drawText(4,   20, "Connect WiFi and visit 192.168.4.1", GREEN, BLACK, 1);
 
     static char buf[32];
     snprintf(buf, sizeof(buf), "ssid: %s", ssid);
@@ -97,14 +110,29 @@ void setup() {
 
     tft.setBrightness(brightness);
 
+    analogReadResolution(12);    // ADC for battery level measurement
+
     // ------ User data input -----
-    while (userMessage != "done")
+    while (currentAction != "finish")
     {
         server.handleClient();
-        if (newMessageReady && userMessage != "done") {
+        if (newMessageReady) {
             newMessageReady = false;
-            tft.fillScreen(BLACK);
-            tft.drawText(5, 25, userMessage.c_str(), WHITE, BLACK, 2);
+            tft.setBrightness(brightness);
+            tft.fillScreen(userBgColor);
+
+            // Render Preview
+            if (userSubtitle.length() == 0){
+                tft.drawText(5, 14, userTitle.c_str(), userTextColor, userBgColor, 6);
+            } else {
+                tft.drawText(5, 4, userTitle.c_str(), userTextColor, userBgColor, 4);
+                tft.drawText(5, 40, userSubtitle.c_str(), userTextColor, userBgColor, 3);
+            }
+
+            if (userQR.length() > 0) 
+                tft.drawQR(userQR.c_str());
+            
+            indicateBatteryLevel(PIN_BAT, tft, userBgColor);
         }
     }
     // ---- stop server ----
@@ -113,35 +141,9 @@ void setup() {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
     esp_wifi_stop();
-
-    // ADC for battery level measurement
-    analogReadResolution(12);
 }
 
 void loop() {
-    // indicate battery level
-    // bat_v = 2 * 2.5 * analogRead(PIN_BAT) / 4095;
-    // bat_percent = static_cast<int>(round(100 * (bat_v - 3.2)));
-
-    bat_percent-- ;
-    if(bat_percent <= 1) bat_percent = 105;
-
-    snprintf(bat_perc_buffer, sizeof(bat_perc_buffer), "%3d%%", bat_percent);
-    tft.drawText(13, 65, bat_perc_buffer, WHITE, BLACK, 1);
-
-    if(bat_percent <= 20){
-        tft.drawChar(5, 65, (char)0x80, RED, BLACK, 1);
-    } else if(bat_percent <= 40){
-        tft.drawChar(5, 65, (char)0x81, YELLOW, BLACK, 1);
-    } else if(bat_percent <= 60){
-        tft.drawChar(5, 65, (char)0x82, WHITE, BLACK, 1);
-    }else if(bat_percent <= 80){
-        tft.drawChar(5, 65, (char)0x83, GREEN, BLACK, 1);
-    }else {
-        tft.drawChar(5, 65, (char)0x84, GREEN, BLACK, 1);
-    }
-
-    tft.drawText(45, 65, "REMAINING BATTERY, 00 min", WHITE, BLACK, 1);
-    
+    indicateBatteryLevel(PIN_BAT, tft, userBgColor);
     goToSleep(1, PIN_BL);
 }

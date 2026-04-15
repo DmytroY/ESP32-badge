@@ -1,26 +1,48 @@
-body {
-    background-color: #2c3e50;
-    color: white;
+body { 
     font-family: sans-serif;
-    text-align: center;
-}
-.btn {
-    display: inline-block;
-    padding: 15px 25px;
-    font-size: 20px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    color: #fff;
+    background: #121212;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 20px; }
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; }
+
+input {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background: #222;
+    color: white; }
+
+.btn-group {
+    display: flex;
+    gap: 10px; }
+
+button {
+    flex: 1;
+    padding: 15px;
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 9px #999;
-    margin: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer; }
+
+.btn-test {
+    background: #3498db;
+    color: white; }
+
+.btn-finish {
+    background: #2ecc71;
+    color: white; }
+
+#status { 
+    text-align: center; 
+    font-size: 0.9em; 
+    margin-top: 10px;
+    min-height: 1.2em; /* Prevents layout jump when text appears */
 }
-.btn:active {
-    box-shadow: 0 5px #666;
-    transform: translateY(4px);
-}
-.on { background-color: #27ae60; }
-.off { background-color: #c0392b; }

@@ -1,22 +1,44 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>C3 Display Control</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Display Controller</title>
 </head>
 <body>
-    <h1>ESP32-C3 Display</h1>
-    <input type="text" id="displayText" placeholder="Enter message...">
-    <button class="btn on" onclick="sendText()">Update Display</button>
+    <div class="container">
+        <h2>Display Settings</h2>
+        <input type="text" id="title" placeholder="Title (Obligatory)" required>
+        <input type="text" id="subtitle" placeholder="Subtitle (Optional)">
+        <input type="text" id="qr" placeholder="QR Code Data (Optional)">
 
-    <script>
-    function sendText() {
-        var text = document.getElementById("displayText").value;
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "/msg?text=" + encodeURIComponent(text), true);
-        xhttp.send();
-    }
-    </script>
+        <div class="settings">
+            <label>Brightness: <input type="range" id="bright" min="10" max="100" value="80"></label>
+            <br>
+            <label>Background:
+                <select id="bgColor" onchange="updateTextColors()">
+                    <option value="0x0000">BLACK</option>
+                    <option value="0xFFFF">WHITE</option>
+                </select>
+            </label>
+            <br>
+            <br>
+
+            <label>Text Color:
+                <select id="textColor">
+                    </select>
+            </label>
+            <br>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="sendData('test')" class="btn-test">Test</button>
+            <button onclick="sendData('finish')" class="btn-finish">Finish</button>
+        </div>
+        <p id="status"></p>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
