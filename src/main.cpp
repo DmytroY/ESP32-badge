@@ -86,7 +86,7 @@ void setup() {
     tft.drawText(4,   20, "Connect WiFi and visit 192.168.4.1", GREEN, BLACK, 1);
 
     static char buf[32];
-    snprintf(buf, sizeof(buf), "ssid: %s", ssid);
+    snprintf(buf, sizeof(buf), "SSID: %s", ssid);
     tft.drawText(5,   35, buf, WHITE, BLACK, 2);
     snprintf(buf, sizeof(buf), "Pass: %s", PASS);
     tft.drawText(5,   57, buf, WHITE, BLACK, 2);
@@ -133,5 +133,5 @@ void setup() {
 
 void loop() {
     indicateBatteryLevel(PIN_BAT, tft, userBgColor, true);
-    goToSleep(60, PIN_BL);
+    goToSleep(1, PIN_BL);
 }

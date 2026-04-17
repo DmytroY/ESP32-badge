@@ -44,9 +44,14 @@ The helper.cpp file provides procedures for
 - Upload Code: Click the standard Upload arrow icon.
 
 ## Usage
-- **On power on** the badge generates a unique SSID based on its MAC address (e.g., ESP-AABBCC).
+- **On power on** the badge generates a unique SSID based on its MAC address.
+<img src="images/displ0.jpg" alt="WiFi connection screen" width="300">
 - You can scan the QR code on the display or manually **connect to the WiFi** using password on screen.
 - **Visit 192.168.4.1** in your browser.
+<img src="images/server0.jpg" alt="server initial page" width="300">
 - **Input** Title (Name), Subtitle (Position or Surname), and string for generating QR Code (Link), choose colors and brightness.
+<img src="images/server1.jpg" alt="server page with user input" width="300">
 - **Use the Test button** to preview. Once satisfied, **press Finish**.
-- **The badge keep screen on but enters sleep mode**, waking briefly every 60 seconds to monitor battery and dispaly remaining time.
+<img src="images/displ1.jpg" alt="display 3 fields" width="300">
+<img src="images/displ2.jpg" alt="display 1 field" width="300">
+- **The badge will keep screen on but enters sleep mode**, waking briefly every 60 seconds to monitor battery and dispaly remaining time.
