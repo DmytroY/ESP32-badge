@@ -1,10 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "esp_wifi.h"
-#include <WebServer.h>
-#include <LittleFS.h>
 #include <ST7789_76x284.h>
 #include "helper.h"
+
 
 // --- WiFi settings ------
 uint8_t mac[6];
@@ -30,7 +29,7 @@ char ssid[20]; // wil be determined based on WiFi MAC to be unique
 ST7789_76x284 tft(TFT_W, TFT_H, X_OFFSET, Y_OFFSET);
 WebServer server(80);
 
-unsigned brightness = 80;  // initial brightness 80%
+unsigned brightness = 50;  // initial brightness 50%
 
 String userTitle = "";
 String userSubtitle = "";
@@ -43,31 +42,20 @@ uint16_t userBgColor = BLACK;
 
 // ── Setup ───────────────────────────────────────────────────────────
 void setup() {
+
+    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars); // ADC calibration
+
     LittleFS.begin();
 
     WiFi.macAddress(mac);
     snprintf(ssid, sizeof(ssid), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
     WiFi.mode(WIFI_AP);
-    WiFi.setTxPower(WIFI_POWER_8_5dBm); // decreased WiFi power
+    WiFi.setTxPower(WIFI_POWER_2dBm); // decreased WiFi power
     WiFi.softAP(ssid, PASS, 1);
 
-    server.on("/", []() {
-        File file = LittleFS.open("/index.html", "r");
-        server.streamFile(file, "text/html");
-        file.close();
-    });
-
-    server.on("/style.css", []() {
-        File file = LittleFS.open("/style.css", "r");
-        server.streamFile(file, "text/css");
-        file.close();
-    });
-
-    server.on("/script.js", []() {
-        File file = LittleFS.open("/script.js", "r");
-        server.streamFile(file, "application/javascript");
-        file.close();
-    });
+    serveFile(server, "/", "/index.html", "text/html");
+    serveFile(server, "/style.css", "/style.css", "text/css");
+    serveFile(server, "/script.js", "/script.js", "application/javascript");
 
     server.on("/msg", []() {
         userTitle = server.arg("title");
@@ -103,14 +91,14 @@ void setup() {
     snprintf(buf, sizeof(buf), "Pass: %s", PASS);
     tft.drawText(5,   57, buf, WHITE, BLACK, 2);
 
-    // QR fot WiFi connection
+    // QR for WiFi connection
     static char qrBuffer[128];
     snprintf(qrBuffer, sizeof(qrBuffer), "WIFI:S:%s;T:WPA;P:%s;;", ssid, PASS);
     tft.drawQR(qrBuffer);
 
     tft.setBrightness(brightness);
 
-    analogReadResolution(12);    // ADC for battery level measurement
+    analogReadResolution(12);    // set resolution for ADC
 
     // ------ User data input -----
     while (currentAction != "finish")
@@ -123,16 +111,16 @@ void setup() {
 
             // Render Preview
             if (userSubtitle.length() == 0){
-                tft.drawText(5, 14, userTitle.c_str(), userTextColor, userBgColor, 6);
+                tft.drawText(UI::TITLE_X, UI::TITLE_1_Y, userTitle.c_str(), userTextColor, userBgColor, 6);
             } else {
-                tft.drawText(5, 4, userTitle.c_str(), userTextColor, userBgColor, 4);
-                tft.drawText(5, 40, userSubtitle.c_str(), userTextColor, userBgColor, 3);
+                tft.drawText(UI::TITLE_X, UI::TITLE_2_Y, userTitle.c_str(), userTextColor, userBgColor, 4);
+                tft.drawText(UI::TITLE_X, UI::SUBTITLE_Y, userSubtitle.c_str(), userTextColor, userBgColor, 3);
             }
 
             if (userQR.length() > 0) 
                 tft.drawQR(userQR.c_str());
             
-            indicateBatteryLevel(PIN_BAT, tft, userBgColor);
+            indicateBatteryLevel(PIN_BAT, tft, userBgColor, false);
         }
     }
     // ---- stop server ----
@@ -144,6 +132,6 @@ void setup() {
 }
 
 void loop() {
-    indicateBatteryLevel(PIN_BAT, tft, userBgColor);
-    goToSleep(1, PIN_BL);
+    indicateBatteryLevel(PIN_BAT, tft, userBgColor, true);
+    goToSleep(60, PIN_BL);
 }
