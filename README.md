@@ -12,7 +12,7 @@ Existing libraries failed to support the non-standard 76x284 resolution and inte
 
 
 ### 1.2. High-Frequency Hardware Integration & EMI Mitigation
-During prototyping, long trace lengths led to significant RF interference between the WiFi antenna and the SPI bus/PWM signals. So I optimized physical pinout which allows reduce betwing boards connection lengths to <5mm for critical high-speed lines (SCLK, MOSI). This effectively eliminated signal crosstalk and ensured stable work of SPI and WiFi.
+During prototyping, long trace lengths led to significant RF interference between the WiFi antenna and the SPI bus/PWM signals. So I optimized physical pinout which allows reduce betwing boards connection lengths to <5mm for critical high-speed lines (SCLK, MOSI) and move the antenna to the edge of the device. This effectively eliminated signal crosstalk and ensured stable work of SPI and WiFi.
 
 **NB !** 
 - SCLK: 7
@@ -23,7 +23,7 @@ During prototyping, long trace lengths led to significant RF interference betwee
 - Backlight (BL): 21
 - Battery ADC: 0
 
- this ESP32 to LCD pinout is recomended  to keep connections as short as possible and prevent EMI.
+ this ESP32 to LCD pinout is recomended to keep connections as short as possible and WiFi antenna on the edge of the device which prevents EMI.
 
 <img src="images/boards0.jpg" alt="interbord connection" width="200">
 
@@ -68,19 +68,30 @@ The helper.cpp file provides procedures for
 ## 3. Software Installation notes
 I have used PlatformIO IDE extension in VS Code. After cloning repository do not forget that Filesystem Image and main code should be uploaded separatelly:
 
-- 3.1. upload to ESP32 filesystem: Open the PlatformIO sidebar, go to Project Tasks > Platform > Build Filesystem Image, click Upload Filesystem Image.
+- Upload to ESP32 filesystem: Open the PlatformIO sidebar, go to Project Tasks > Platform > Build Filesystem Image, click Upload Filesystem Image.
 
- - 3.2.upload Code: click the standard Upload arrow icon.
+ - Upload Code: click the standard Upload arrow icon.
 
 ## 4. Usage
 - On power on the badge generates a unique SSID based on its MAC address.
 <img src="images/displ0.jpg" alt="WiFi connection screen" width="300">
+
 - You can scan the QR code on the display or manually connect to the WiFi using password on screen.
+
 - Visit 192.168.4.1 in your browser.
+
 <img src="images/server0.jpg" alt="server initial page" width="300">
+
 - Input Title (Name), Subtitle (Position or Surname), and string for generating QR Code (Link), choose colors and brightness.
+
+**Remark:** In case of Subtitle is not used Title field font and position will be automaticaly adjusten for beter visibility .
+
 <img src="images/server1.jpg" alt="server page with user input" width="300">
-- Use the Test button to preview. Once satisfied, press Finish.
+
+- Use the Test button to preview your design. Once satisfied, press Finish.
+
 <img src="images/displ1.jpg" alt="display 3 fields" width="300">
+
 <img src="images/displ2.jpg" alt="display 1 field" width="300">
+
 - The badge will keep screen on, but enters sleep mode, waking briefly every 60 seconds to monitor battery and dispaly remaining time.
