@@ -38,7 +38,7 @@ float measureBattery(int8_t pin_bat){
     // Takes in to account ADC calibration and HW divider 
     uint32_t raw_v = analogRead(pin_bat); // read uncalibrated voltage
     uint32_t voltage_mv = esp_adc_cal_raw_to_voltage(raw_v, &adc_chars);  // Convert raw to mV using the calibrated characteristics
-    return (voltage_mv * 2.2f) / 1000.0f; // Convert to actual battery voltage (7k5 + 6k2 voltage divider used)
+    return (voltage_mv * 2.16f) / 1000.0f; // Convert to actual battery voltage (7k5 + 6k2 voltage divider used)
 }
 
 int get_percentage(float v) {
@@ -67,12 +67,18 @@ void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, uint16_t bg_color,
     float bat_v_raw = measureBattery(pin_bat); // curent level
     bat_v = (bat_v_raw * 0.1f) + (bat_v * 0.9f); //  EMA filter
 
-    int bat_percent = get_percentage(bat_v);
+    // Display battery voltage
+    char bat_v_buff[6];
+    snprintf(bat_v_buff, sizeof(bat_v_buff), "%.2fV", bat_v);
+    tft.drawText(UI::BATTERY_VOLT_X, UI::BATTERY_INFO_Y, bat_v_buff, text_color, bg_color, 1);
 
+    // Display battery %
+    int bat_percent = get_percentage(bat_v);
     char bat_perc_buffer[5]; // 3-digit number + % + null terminator
     snprintf(bat_perc_buffer, sizeof(bat_perc_buffer), "%3d%%", bat_percent);
     tft.drawText(UI::BATTERY_PERCENT_X, UI::BATTERY_INFO_Y, bat_perc_buffer, text_color, bg_color, 1);
 
+    // Display battery icon
     if(bat_percent <= 20){
         tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x80, RED, bg_color, 1);
     } else if(bat_percent <= 40){
@@ -85,6 +91,7 @@ void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, uint16_t bg_color,
         tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x84, GREEN, bg_color, 1);
     }
 
+    // Display remaining time
     if(calculate_remaining_time_flag){
         static const unsigned start_time = millis();
         static const float start_bat_v = measureBattery(pin_bat);

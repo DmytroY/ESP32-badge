@@ -32,8 +32,9 @@ static const int lut_size = sizeof(lut) / sizeof(lut[0]);
 namespace UI {
     constexpr int TITLE_X = 5;
     constexpr int BATTERY_ICON_X = 5;
-    constexpr int BATTERY_PERCENT_X = 13;
-    constexpr int BATTERY_INFO_X = 45;
+    constexpr int BATTERY_VOLT_X = 13;
+    constexpr int BATTERY_PERCENT_X = 48;
+    constexpr int BATTERY_INFO_X = 80;
     constexpr int BATTERY_INFO_Y = 68;
     constexpr int TITLE_1_Y = 14;
     constexpr int TITLE_2_Y = 4;

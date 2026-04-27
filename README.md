@@ -43,6 +43,18 @@ Since the display requires a PWM signal for the backlight, Deep Sleep was bypass
 
 * to calculate remaining battery capacity accurately I use approximated voltage zones of non-linear voltage/capacity function of Li-Ion battery then provide real-time runtime estimates.
 
+#### Consumption and lifetime
+There are two modes of functioning.
+* SETUP mode. System starts with running WiFi and server. After user input data and chose brightness sytem state transfers to
+* DISPLAY mode. ESP32 shouts down server and WiFi, going to sleep mode. Only PWM for display backlight works and battery comsumption mostly depends on chosen screen brightness.
+
+| Mode | Brightness| Current (mA)|
+|------|-----------|-------------|
+| Setup  | 50%     |     170     |
+| Display| min     |     24      |
+| Display| 50%     |     60      |
+| Display| max     |     110     |
+
 ### 1.4. Software Architecture
 The badge implements a "headless" configuration mode to keep the firmware footprint small and the UI responsive.
 
@@ -84,13 +96,14 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 
 - Input Title (Name), Subtitle (Position or Surname), and string for generating QR Code (Link), choose colors and brightness.
 
-**Remark:** In case of Subtitle is not used Title field font and position will be automaticaly adjusten for beter visibility .
-
 <img src="images/server1.jpg" alt="server page with user input" width="300">
 
 - Use the Test button to preview your design. Once satisfied, press Finish.
 
 <img src="images/displ1.jpg" alt="display 3 fields" width="300">
+
+
+**Remarks:** In case of Subtitle is not used Title field font and position will be automaticaly adjusten for beter visibility:
 
 <img src="images/displ2.jpg" alt="display 1 field" width="300">
 
