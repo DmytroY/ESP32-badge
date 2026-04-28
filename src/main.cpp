@@ -133,5 +133,5 @@ void setup() {
 
 void loop() {
     indicateBatteryLevel(PIN_BAT, tft, brightness, userBgColor, true);
-    goToSleep(10, PIN_BL);
+    goToSleep(60, PIN_BL);
 }

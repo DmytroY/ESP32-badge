@@ -21,13 +21,11 @@ static const unsigned bat_max_cap = 350;
 // Standard Li-ion discharge curve Lookup Table
 static const VoltagePoint lut[] = {
     {4.20, 100},
-    {4.10, 90},
-    {4.00, 80},
-    {3.90, 65},
-    {3.80, 45},
-    {3.70, 20},
-    {3.60, 10},
-    {3.50, 5},
+    {4.10, 96},
+    {4.00, 85},
+    {3.70, 23},
+    {3.60, 8},
+    {3.45, 4},
     {3.20, 0}
 };
 static const int lut_size = sizeof(lut) / sizeof(lut[0]);
@@ -35,9 +33,9 @@ static const int lut_size = sizeof(lut) / sizeof(lut[0]);
 namespace UI {
     constexpr int TITLE_X = 5;
     constexpr int BATTERY_ICON_X = 5;
-    constexpr int BATTERY_VOLT_X = 13;
-    constexpr int BATTERY_PERCENT_X = 48;
-    constexpr int BATTERY_INFO_X = 80;
+    constexpr int BATTERY_VOLT_X = 18;
+    constexpr int BATTERY_PERCENT_X = 53;
+    constexpr int BATTERY_INFO_X = 85;
     constexpr int BATTERY_INFO_Y = 68;
     constexpr int TITLE_1_Y = 14;
     constexpr int TITLE_2_Y = 4;
