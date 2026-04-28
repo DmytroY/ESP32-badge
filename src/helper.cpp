@@ -58,9 +58,10 @@ int get_percentage(float v) {
     return 0;
 }
 
-void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, uint16_t bg_color, bool calculate_remaining_time_flag){
-    // display batery icon, capacity % and estimater remaining time
+void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, unsigned brightness, uint16_t bg_color, bool calculate_remaining_time_flag){
+    // display batery icon, capacity % and estimated remaining time
 
+    // be sure text is visible
     uint16_t text_color = (bg_color == BLACK) ? WHITE : BLACK;
 
     static float bat_v = measureBattery(pin_bat); // initial level
@@ -79,32 +80,35 @@ void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, uint16_t bg_color,
     tft.drawText(UI::BATTERY_PERCENT_X, UI::BATTERY_INFO_Y, bat_perc_buffer, text_color, bg_color, 1);
 
     // Display battery icon
-    if(bat_percent <= 20){
-        tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x80, RED, bg_color, 1);
-    } else if(bat_percent <= 40){
-        tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x81, text_color, bg_color, 1);
-    } else if(bat_percent <= 60){
-        tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x82, text_color, bg_color, 1);
-     }else if(bat_percent <= 80){
-        tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x83, text_color, bg_color, 1);
-    }else {
-        tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x84, GREEN, bg_color, 1);
-    }
+    if(bat_percent <= 20)     { tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x80, RED, bg_color, 1);}
+    else if(bat_percent <= 40){ tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x81, text_color, bg_color, 1);}
+    else if(bat_percent <= 60){ tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x82, text_color, bg_color, 1);}
+    else if(bat_percent <= 80){ tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x83, text_color, bg_color, 1);}
+    else                      { tft.drawChar(UI::BATTERY_ICON_X, UI::BATTERY_INFO_Y, (char)0x84, GREEN, bg_color, 1);}
 
     // Display remaining time
     if(calculate_remaining_time_flag){
-        static const unsigned start_time = millis();
-        static const float start_bat_v = measureBattery(pin_bat);
-        static const int start_bat_percent = get_percentage(start_bat_v);
 
-        unsigned long elapsed = millis() - start_time;
-        float discharge_speed = (elapsed > 60000) ? (start_bat_percent - bat_percent) / (elapsed / 3600000.0f) : 10;
-        discharge_speed = (discharge_speed  > 0) ? discharge_speed : 2.33;
+        // Polynomial approximation of draining current depending on display brightness (mA)
+        float current = 0.00755 * brightness * brightness + 0.32 * brightness + 20;
+        // defining remained time based on remaining charge and draining current
+        float remained_hours = (bat_max_cap * bat_percent / 100.0f) / current;
+        int rem_time_h = static_cast<int>(remained_hours); // remaining time in hours
+        int rem_time_m = static_cast<int>((remained_hours - rem_time_h) * 60);
 
-        div_t remaining = div(bat_percent, discharge_speed);
+        // static const unsigned start_time = millis();
+        // static const float start_bat_v = measureBattery(pin_bat);
+        // static const int start_bat_percent = get_percentage(start_bat_v);
 
-        int rem_time_h = remaining.quot; // remaining time in hours
-        int rem_time_m = static_cast<int>(60.0f * remaining.rem/discharge_speed); // remaining time in minutes
+        // unsigned long elapsed = millis() - start_time;
+        // float discharge_speed = (elapsed > 60000) ? (start_bat_percent - bat_percent) / (elapsed / 3600000.0f) : 10;
+        // discharge_speed = (discharge_speed  > 0) ? discharge_speed : 2.33;
+
+        // div_t remaining = div(bat_percent, discharge_speed);
+
+        // int rem_time_h = remaining.quot; // remaining time in hours
+        // int rem_time_m = static_cast<int>(60.0f * remaining.rem/discharge_speed); // remaining time in minutes
+        
         char rem_time_buffer[17]; // including null terminator
         snprintf(rem_time_buffer, sizeof(rem_time_buffer), "remaining %2dh%2dm", rem_time_h, rem_time_m);
         tft.drawText(UI::BATTERY_INFO_X, UI::BATTERY_INFO_Y, rem_time_buffer, text_color, bg_color, 1);

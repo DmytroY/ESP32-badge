@@ -15,6 +15,9 @@ struct VoltagePoint {
     int percentage;
 };
 
+// Battery initial cpacity
+static const unsigned bat_max_cap = 350;
+
 // Standard Li-ion discharge curve Lookup Table
 static const VoltagePoint lut[] = {
     {4.20, 100},
@@ -45,6 +48,6 @@ void serveFile(WebServer &server, const char* route, const char* path, const cha
 void goToSleep(unsigned sec, int8_t bl);
 int get_percentage(float v);
 float measureBattery(int8_t pin_bat);
-void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, uint16_t bg_color, bool calculate_remaining_time_flag);
+void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, unsigned brightness, uint16_t bg_color, bool calculate_remaining_time_flag);
 
 #endif

@@ -120,7 +120,7 @@ void setup() {
             if (userQR.length() > 0) 
                 tft.drawQR(userQR.c_str());
             
-            indicateBatteryLevel(PIN_BAT, tft, userBgColor, false);
+            indicateBatteryLevel(PIN_BAT, tft, brightness, userBgColor, false);
         }
     }
     // ---- stop server ----
@@ -132,6 +132,6 @@ void setup() {
 }
 
 void loop() {
-    indicateBatteryLevel(PIN_BAT, tft, userBgColor, true);
+    indicateBatteryLevel(PIN_BAT, tft, brightness, userBgColor, true);
     goToSleep(10, PIN_BL);
 }
