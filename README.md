@@ -89,7 +89,8 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 
 ## 4. Usage
 - On power on the badge generates a unique SSID based on its MAC address.
-<img src="images/displ0.jpg" alt="WiFi connection screen" width="300">
+
+<img src="images/displ00.jpg" alt="WiFi connection screen" width="300">
 
 - You can scan the QR code on the display or manually connect to the WiFi using password on screen.
 
@@ -103,11 +104,11 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 
 - Use the Test button to preview your design. Once satisfied, press Finish.
 
-<img src="images/displ1.jpg" alt="display 3 fields" width="300">
+<img src="images/displ01.jpg" alt="display 3 fields" width="300">
 
 
 **Remarks:** In case of Subtitle is not used Title field font and position will be automaticaly adjusten for beter visibility:
 
-<img src="images/displ2.jpg" alt="display 1 field" width="300">
+<img src="images/displ02.jpg" alt="display 1 field" width="300">
 
 - The badge will keep screen on, but enters sleep mode, waking briefly every 60 seconds to monitor battery and dispaly remaining time.
