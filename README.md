@@ -1,4 +1,6 @@
 # Electronic Conference Badge (ESP32)
+<img src="images/badge in the case.jpg" alt="bage front view" width="300">
+
 A low-power embedded system featuring a custom display driver, web-based asynchronous configuration portal.
 Is a result of full-stack embedded development, from low-level SPI driver authorship to UI/UX and power profiling.
 
@@ -27,6 +29,7 @@ During prototyping, long trace lengths led to significant RF interference betwee
 
 <img src="images/boards0.jpg" alt="interbord connection" width="200">
 
+<img src="images/back.jpg" alt="interbord connection" width="400">
 
 ### 1.3. Power Management & Battery Analytics
 To achieve maximum operational uptime without losing the display state, the system employs next power strategy:
