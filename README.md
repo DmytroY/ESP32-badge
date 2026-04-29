@@ -106,9 +106,12 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 
 <img src="images/displ01.jpg" alt="display 3 fields" width="300">
 
+<img src="images/displ02.jpg" alt="display 1 field" width="300">
+
 
 **Remarks:** In case of Subtitle is not used Title field font and position will be automaticaly adjusten for beter visibility:
 
-<img src="images/displ02.jpg" alt="display 1 field" width="300">
+<img src="images/title_only.jpg" alt="display 1 field" width="300">
+
 
 - The badge will keep screen on, but enters sleep mode, waking briefly every 60 seconds to monitor battery and dispaly remaining time.
