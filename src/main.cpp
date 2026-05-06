@@ -30,6 +30,7 @@ ST7789_76x284 tft(TFT_W, TFT_H, X_OFFSET, Y_OFFSET);
 WebServer server(80);
 
 unsigned brightness = 50;  // initial brightness 50%
+const unsigned long TIMEOUT_MS = 60000; // 60 seconds timeout user activity 
 
 String userTitle = "";
 String userSubtitle = "";
@@ -44,6 +45,7 @@ uint16_t userBgColor = BLACK;
 void setup() {
 
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars); // ADC calibration
+    analogReadResolution(12);    // set resolution for ADC
 
     LittleFS.begin();
 
@@ -80,31 +82,32 @@ void setup() {
 
     tft.begin(PIN_SCLK, PIN_MOSI, PIN_CS, PIN_DC, PIN_RST, PIN_BL);
     tft.fillScreen(BLACK);
-    tft.drawRect(0, 0, TFT_W, TFT_H, WHITE);
+    // tft.drawRect(0, 0, TFT_W, TFT_H, WHITE);
     
-    tft.drawText(40,  5, "WELCOME !", GREEN, BLACK, 1);
-    tft.drawText(4,   20, "Connect WiFi and visit 192.168.4.1", GREEN, BLACK, 1);
+    tft.drawText(5,   5, "Connect WiFi, visit 192.168.4.1", GREEN, BLACK, 1);
 
     static char buf[32];
     snprintf(buf, sizeof(buf), "SSID: %s", ssid);
-    tft.drawText(5,   35, buf, WHITE, BLACK, 2);
+    tft.drawText(5,   20, buf, WHITE, BLACK, 2);
     snprintf(buf, sizeof(buf), "Pass: %s", PASS);
-    tft.drawText(5,   57, buf, WHITE, BLACK, 2);
+    tft.drawText(5,   43, buf, WHITE, BLACK, 2);
 
     // QR for WiFi connection
     static char qrBuffer[128];
     snprintf(qrBuffer, sizeof(qrBuffer), "WIFI:S:%s;T:WPA;P:%s;;", ssid, PASS);
     tft.drawQR(qrBuffer);
 
+    indicateBatteryLevel(PIN_BAT, tft, brightness, userBgColor, false);
+
     tft.setBrightness(brightness);
 
-    analogReadResolution(12);    // set resolution for ADC
-
     // ------ User data input -----
+    unsigned long lastActivity = millis();
     while (currentAction != "finish")
     {
         server.handleClient();
         if (newMessageReady) {
+            lastActivity = millis(); // Reset timer
             newMessageReady = false;
             tft.setBrightness(brightness);
             tft.fillScreen(userBgColor);
@@ -121,6 +124,16 @@ void setup() {
                 tft.drawQR(userQR.c_str());
             
             indicateBatteryLevel(PIN_BAT, tft, brightness, userBgColor, false);
+        }
+        // Break by user inactivity timeout
+        if (millis() - lastActivity > TIMEOUT_MS) {
+            tft.setBrightness(10);
+            tft.fillScreen(BLACK);
+            userBgColor = BLACK;
+            tft.drawText(UI::TITLE_X, UI::TITLE_2_Y, "Do not forget", RED, userBgColor, 3);
+            tft.drawText(UI::TITLE_X, UI::TITLE_2_Y + 25, "connect charger", RED, userBgColor, 3);
+            tft.drawText(5, UI::BATTERY_INFO_Y - 10, "Need reboot to connect server", WHITE, userBgColor, 1);
+            break; 
         }
     }
     // ---- stop server ----

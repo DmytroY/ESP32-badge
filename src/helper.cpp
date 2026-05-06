@@ -66,7 +66,7 @@ void indicateBatteryLevel(int8_t pin_bat, ST7789_76x284 &tft, unsigned brightnes
 
     static float bat_v = measureBattery(pin_bat); // initial level
     float bat_v_raw = measureBattery(pin_bat); // curent level
-    bat_v = (bat_v_raw * 0.1f) + (bat_v * 0.9f); //  EMA filter
+    bat_v = (bat_v_raw * 0.3f) + (bat_v * 0.7f); //  EMA filter
 
     // Display battery voltage
     char bat_v_buff[6];
