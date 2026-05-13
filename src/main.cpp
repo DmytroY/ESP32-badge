@@ -30,7 +30,7 @@ ST7789_76x284 tft(TFT_W, TFT_H, X_OFFSET, Y_OFFSET);
 WebServer server(80);
 
 unsigned brightness = 50;  // initial brightness 50%
-const unsigned long TIMEOUT_MS = 60000; // 60 seconds timeout user activity 
+const unsigned long TIMEOUT_MS = 300000; // 5 minutes timeout user activity 
 
 String userTitle = "";
 String userSubtitle = "";
@@ -86,11 +86,14 @@ void setup() {
     
     tft.drawText(5,   5, "Connect WiFi, visit 192.168.4.1", GREEN, BLACK, 1);
 
+    // WIFi ON simbol
+    tft.drawChar(0, 20, (char)0x86, WHITE, BLACK, 3);
+
     static char buf[32];
-    snprintf(buf, sizeof(buf), "SSID: %s", ssid);
-    tft.drawText(5,   20, buf, WHITE, BLACK, 2);
-    snprintf(buf, sizeof(buf), "Pass: %s", PASS);
-    tft.drawText(5,   43, buf, WHITE, BLACK, 2);
+    snprintf(buf, sizeof(buf), "SSID:%s", ssid);
+    tft.drawText(20,   20, buf, WHITE, BLACK, 2);
+    snprintf(buf, sizeof(buf), "Pass:%s", PASS);
+    tft.drawText(20,   43, buf, WHITE, BLACK, 2);
 
     // QR for WiFi connection
     static char qrBuffer[128];
@@ -127,12 +130,14 @@ void setup() {
         }
         // Break by user inactivity timeout
         if (millis() - lastActivity > TIMEOUT_MS) {
-            tft.setBrightness(10);
+            tft.setBrightness(50);
             tft.fillScreen(BLACK);
+            // WIFi OF simbol
+            tft.drawChar(0, 20, (char)0x85, WHITE, BLACK, 3);
             userBgColor = BLACK;
-            tft.drawText(UI::TITLE_X, UI::TITLE_2_Y, "Do not forget", RED, userBgColor, 3);
-            tft.drawText(UI::TITLE_X, UI::TITLE_2_Y + 25, "connect charger", RED, userBgColor, 3);
-            tft.drawText(5, UI::BATTERY_INFO_Y - 10, "Need reboot to connect server", WHITE, userBgColor, 1);
+            tft.drawText(UI::TITLE_X + 25, UI::TITLE_2_Y, "Do not forget to", RED, userBgColor, 2);
+            tft.drawText(UI::TITLE_X + 25, UI::TITLE_2_Y + 20, "connect charger.", RED, userBgColor, 2);
+            tft.drawText(UI::TITLE_X + 25, UI::TITLE_2_Y + 40, "Reboot to restart server", WHITE, userBgColor, 1);
             break; 
         }
     }
