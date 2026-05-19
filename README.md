@@ -1,5 +1,5 @@
 # Electronic Conference Badge (ESP32)
-<img src="images/badge in the case.jpg" alt="bage front view" width="300">
+<img src="images/badge_in_case.jpg" alt="bage front view" width="300">
 
 A low-power embedded system featuring a custom display driver, web-based asynchronous configuration portal.
 Is a result of full-stack embedded development, from low-level SPI driver authorship to UI/UX and power profiling.
@@ -90,7 +90,7 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 ## 4. Usage
 - On power on the badge generates a unique SSID based on its MAC address.
 
-<img src="images/displ00.jpg" alt="WiFi connection screen" width="300">
+<img src="images/badge_connect_WiFi.jpg" alt="WiFi connection screen" width="300">
 
 - You can scan the QR code on the display or manually connect to the WiFi using password on screen.
 
