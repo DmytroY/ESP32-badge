@@ -73,11 +73,16 @@ The helper.cpp file provides procedures for
 
 
 ## 2. Hardware Configuration
-- MCU: ESP32 Super Mini
-- Display: ST7789 LCD (76x284 resolution)
-- Power: Li-Ion Battery + DC/DC converter to 3.3V
-- Charging: 5V Li-Ion charger controller
-- Battery Sensing: 7.5k / 6.2k divider connects battery to PIN_0 (ADC) and shifts voltage to optimal ADC range.
+The circuit is powered by a Li-ion battery, so it was necessary to address the issues of battery charging, charge level monitoring, and converting the Li-ion battery voltage to the 3.3 V supply voltage for the microcontroller and display. The following components were used:
+- TP4056 - Li-ion battery charge controller with USB Type-C input 
+- 350 mAh Li-ion battery
+- DD0603SA DC/DC converter from 0.9-6V to 3.3V
+- Power switch
+- ESP32-C3_SuperMini development board with onboard WiFi
+- 2.25-inch TFT LCD 76x284 resolution module with SPI interface and ST7789 controller 
+- 7.5k / 6.2k divider connects the battery to PIN_0 (ADC) and shifts the voltage to the optimal ADC range.
+
+<img src="images/badge_schematic.jpg" alt="bage schematic" width="500">
 
 
 ## 3. Software Installation notes
@@ -88,6 +93,9 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
  - Upload Code: click the standard Upload arrow icon.
 
 ## 4. Usage
+
+[![Watch the video](https://img.youtube.com/vi/PrKOngyS30c/2.jpg)](https://youtu.be/PrKOngyS30c)
+
 - On power on the badge generates a unique SSID based on its MAC address.
 
 <img src="images/badge_connect_WiFi.jpg" alt="WiFi connection screen" width="300">
