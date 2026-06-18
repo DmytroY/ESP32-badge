@@ -4,7 +4,7 @@ A lightweight C++ driver for the ST7789 (76x284px) TFT display, optimized for th
 
 ## Features
 * Custom Resolution: Specifically configured for 76x284 displays.
-* Dual Fonts: Built-in 5x7 and 10x14 pixel fonts.
+* Dual Fonts: Built-in 5x7, 10x14 and 15x21 pixel fonts.
 * Predefined colors: BLACK, WHITE, BLUE, GREEN, RED, YELLOW, MAGENTA, CYAN   
 * Hardware PWM: Smooth 8-bit brightness control using the ESP32-C3 RTC clock.
 * Graphics Primitives: Support for pixels, lines, rectangles, and filled areas.
@@ -43,12 +43,18 @@ void begin(int8_t sclk, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t bl
 ### Text and Fonts
 `drawText(int16_t x, int16_t y, const char* str, uint16_t fg, uint16_t bg, uint8_t scale`
 
-* Scale 1, 3, 5...: Uses the 5x7 font.
-* Scale 2, 4, 6...: Uses the 10x14 font.
-* Scale 3,6,9 ....: Uses the 15x21 font.
+features of **scale** parameter:
+| scale | used font | multiplier | remark |
+| -------- | ------- | ------| -----|
+| 1 | 5x7 | 1 | visible as 5x7 |
+| 2 | 10x14 | 1 | visible as 10x14|
+| 3 | 15x21| 1 | visible as 15x21|
+| 4 | 10x14 | 2 | visible as 20x28|
+| 5 and more | 15x21 | 2 | visible as 30x42|
 
-#### additionaly to printable ASCII simbols predefined iconscan be printed with drawChar():
-1. 0x7F - low consumption mode
+
+#### additionaly to printable ASCII simbols predefined icons can be printed with drawChar():
+1. 0x7F - low consumption mode (tree leaf)
 1. 0x80 - Battery 0%
 1. 0x81 - Battety 25%
 1. 0x82 - Battety 50%
@@ -67,7 +73,7 @@ example of usage:
 `drawQR(const char* str, int16_t x, int16_t y)`
 
 Renders a QR code at specific coordinates.
-In case of optional parameters x and y are not provided QR code renders at the far right position in lanscape mode and at the bottom in portrait mode
+In case of optional parameters x and y are not provided QR code renders at the far right position in lanscape mode and at the bottom in portrait mode.
 
 
 
@@ -95,6 +101,6 @@ void loop() {}
 
 ## Technical Details
 * Color Format: BRG565 (16-bit).
-* SPI Frequency: 8MHz (Adjustable in begin).
+* Default SPI Frequency: 8MHz (Adjustable in begin).
 * PWM Frequency: 5kHz.
 * Backlight: Optimized for active-low hardware configurations (100% brightness = 0 duty cycle).
