@@ -94,6 +94,7 @@ I have used PlatformIO IDE extension in VS Code. After cloning repository do not
 
 ## 4. Usage
 Watch Youtube video:
+
 [![Watch the video](https://img.youtube.com/vi/PrKOngyS30c/2.jpg)](https://youtu.be/PrKOngyS30c)
 
 - On power on the badge generates a unique SSID based on its MAC address.
