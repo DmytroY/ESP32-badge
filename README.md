@@ -75,7 +75,7 @@ The helper.cpp file provides procedures for
 ## 2. Hardware Configuration
 The circuit is powered by a Li-ion battery, so it was necessary to address the issues of battery charging, charge level monitoring, and converting the Li-ion battery voltage to the 3.3 V supply voltage for the microcontroller and display. The following components were used:
 - TP4056 - Li-ion battery charge controller with USB Type-C input 
-- 350 mAh Li-ion battery
+- 400 mAh Li-ion battery
 - DD0603SA DC/DC converter from 0.9-6V to 3.3V
 - Power switch
 - ESP32-C3_SuperMini development board with onboard WiFi
